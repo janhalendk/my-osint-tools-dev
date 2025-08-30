@@ -1,0 +1,38 @@
+name: Bump VERSION
+
+on:
+  push:
+    paths:
+      - "index.html"
+
+jobs:
+  bump: # name of job
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # enable commit to repo
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Bump patch VERSION
+        run: |
+          IFS="." read -r major minor patch < VERSION
+          echo "Current version: $major.$minor.$patch"
+
+          # increase patch
+          patch=$((patch+1))
+          new="$major.$minor.$patch"
+
+          echo $new > VERSION
+          echo "New version stored: $new"
+
+          # commit and push
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add VERSION
+          git commit -m "bump VERSION to $new" || echo "No changes"
+          git push
